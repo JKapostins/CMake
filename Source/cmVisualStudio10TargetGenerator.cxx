@@ -2042,37 +2042,40 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       this->ConvertToWindowsSlash(intermediateDir);
       this->ConvertToWindowsSlash(outDir);
 
-      this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
-      *this->BuildFileStream << cmVS10EscapeXML(outDir) << "</OutDir>\n";
+      if (this->GlobalGenerator->TargetsLinux() == false)
+      {
+          this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
+          *this->BuildFileStream << cmVS10EscapeXML(outDir) << "</OutDir>\n";
 
-      this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
-      *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
-                             << "</IntDir>\n";
+          this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
+          *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
+              << "</IntDir>\n";
 
-      if (const char* workingDir = this->GeneratorTarget->GetProperty(
-            "VS_DEBUGGER_WORKING_DIRECTORY")) {
-        this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory",
-                                     config->c_str(), 3);
-        *this->BuildFileStream << cmVS10EscapeXML(workingDir)
-                               << "</LocalDebuggerWorkingDirectory>\n";
+          if (const char* workingDir = this->GeneratorTarget->GetProperty(
+              "VS_DEBUGGER_WORKING_DIRECTORY")) {
+              this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory",
+                  config->c_str(), 3);
+              *this->BuildFileStream << cmVS10EscapeXML(workingDir)
+                  << "</LocalDebuggerWorkingDirectory>\n";
+          }
+
+          std::string name =
+              cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
+          this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
+          *this->BuildFileStream << cmVS10EscapeXML(name) << "</TargetName>\n";
+
+          std::string ext =
+              cmSystemTools::GetFilenameLastExtension(targetNameFull);
+          if (ext.empty()) {
+              // An empty TargetExt causes a default extension to be used.
+              // A single "." appears to be treated as an empty extension.
+              ext = ".";
+          }
+          this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
+          *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
+
+          this->OutputLinkIncremental(*config);
       }
-
-      std::string name =
-        cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-      this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
-      *this->BuildFileStream << cmVS10EscapeXML(name) << "</TargetName>\n";
-
-      std::string ext =
-        cmSystemTools::GetFilenameLastExtension(targetNameFull);
-      if (ext.empty()) {
-        // An empty TargetExt causes a default extension to be used.
-        // A single "." appears to be treated as an empty extension.
-        ext = ".";
-      }
-      this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
-      *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
-
-      this->OutputLinkIncremental(*config);
     }
   }
   this->WriteString("</PropertyGroup>\n", 2);
@@ -2811,9 +2814,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       this->GeneratorTarget->GetDirectory(config.c_str(), true);
     imLib += "/";
     imLib += targetNameImport;
-
-    linkOptions.AddFlag("ImportLibrary", imLib.c_str());
-    linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
+    if (this->GlobalGenerator->TargetsLinux() == false)
+    {
+        linkOptions.AddFlag("ImportLibrary", imLib.c_str());
+        linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
+    }
 
     // A Windows Runtime component uses internal .NET metadata,
     // so does not have an import library.
