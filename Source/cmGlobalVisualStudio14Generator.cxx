@@ -139,6 +139,11 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
   return true;
 }
 
+bool cmGlobalVisualStudio14Generator::InitializeLinux(cmMakefile* mf)
+{
+	return true; //GNARLY_TODO: Check to make sure the linux tools are installed (https://marketplace.visualstudio.com/items?itemName=VisualCPPTeam.VisualCforLinuxDevelopment)
+}
+
 bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
                                                          bool required)
 {

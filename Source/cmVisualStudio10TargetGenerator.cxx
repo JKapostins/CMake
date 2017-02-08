@@ -933,11 +933,14 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   } else {
     this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
   }
-  if (const char* toolset = gg->GetPlatformToolset()) {
-    std::string pts = "<PlatformToolset>";
-    pts += toolset;
-    pts += "</PlatformToolset>\n";
-    this->WriteString(pts.c_str(), 2);
+  if (gg->TargetsLinux() == false)
+  {
+      if (const char* toolset = gg->GetPlatformToolset()) {
+          std::string pts = "<PlatformToolset>";
+          pts += toolset;
+          pts += "</PlatformToolset>\n";
+          this->WriteString(pts.c_str(), 2);
+      }
   }
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
@@ -973,10 +976,13 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     o.RemoveFlag("Platform");
   }
 
-  if (const char* toolset = gg->GetPlatformToolset()) {
-    this->WriteString("<PlatformToolset>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(toolset)
-                             << "</PlatformToolset>\n";
+  if (gg->TargetsLinux() == false)
+  {
+      if (const char* toolset = gg->GetPlatformToolset()) {
+          this->WriteString("<PlatformToolset>", 2);
+          (*this->BuildFileStream) << cmVS10EscapeXML(toolset)
+              << "</PlatformToolset>\n";
+      }
   }
 
   std::string postfixName = cmSystemTools::UpperCase(config);
@@ -3419,6 +3425,7 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
   bool isAppContainer = false;
   bool const isWindowsPhone = this->GlobalGenerator->TargetsWindowsPhone();
   bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
+  bool const isLinux = this->GlobalGenerator->TargetsLinux();
   std::string const& v = this->GlobalGenerator->GetSystemVersion();
   if (isWindowsPhone || isWindowsStore) {
     this->WriteString("<ApplicationType>", 2);
@@ -3475,6 +3482,25 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       }
     }
   }
+  else if (isLinux)
+  {
+	this->WriteString("<ApplicationType>", 2);
+	(*this->BuildFileStream)
+		<< "Linux"
+		<< "</ApplicationType>\n";
+
+	this->WriteString("<ApplicationTypeRevision>", 2);
+	(*this->BuildFileStream) << cmVS10EscapeXML("1.0")
+		<< "</ApplicationTypeRevision>\n";
+
+	this->WriteString("<MinimumVisualStudioVersion>14.0"
+		"</MinimumVisualStudioVersion>\n",
+		2);
+
+	this->WriteString("<TargetLinuxPlatform>Generic"
+		"</TargetLinuxPlatform>\n", 2);
+  }
+
   if (isAppContainer) {
     this->WriteString("<AppContainerApplication>true"
                       "</AppContainerApplication>\n",

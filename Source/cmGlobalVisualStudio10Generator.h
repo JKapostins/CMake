@@ -75,6 +75,9 @@ public:
   /** Return true if building for WindowsStore */
   bool TargetsWindowsStore() const { return this->SystemIsWindowsStore; }
 
+  /** Return true if building for Linux */
+  bool TargetsLinux() const { return this->SystemIsLinux; }
+
   virtual const char* GetCMakeCFGIntDir() const { return "$(Configuration)"; }
   bool Find64BitTools(cmMakefile* mf);
 
@@ -104,6 +107,7 @@ protected:
   virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual bool InitializeLinux(cmMakefile* mf);
 
   virtual std::string SelectWindowsCEToolset() const;
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
@@ -129,6 +133,7 @@ protected:
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;
+  bool SystemIsLinux;
 
 private:
   class Factory;

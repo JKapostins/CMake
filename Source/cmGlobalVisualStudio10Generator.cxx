@@ -97,6 +97,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsCE = false;
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
+  this->SystemIsLinux = false;
   this->MSBuildCommandInitialized = false;
   {
     std::string envPlatformToolset;
@@ -219,6 +220,11 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     if (!this->InitializeWindowsStore(mf)) {
       return false;
     }
+  } else if (this->SystemName == "Linux") {
+	  this->SystemIsLinux = true;
+	  if (!this->InitializeLinux(mf)) {
+		  return false;
+	  }
   } else if (this->SystemName == "Android") {
     if (this->DefaultPlatformName != "Win32") {
       std::ostringstream e;
@@ -278,6 +284,14 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   e << this->GetName() << " does not support Windows Store.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
+}
+
+bool cmGlobalVisualStudio10Generator::InitializeLinux(cmMakefile* mf)
+{
+	std::ostringstream e;
+	e << this->GetName() << " does not support Linux.";
+	mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+	return false;
 }
 
 bool cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(

@@ -162,6 +162,14 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
   return true;
 }
 
+bool cmGlobalVisualStudio12Generator::InitializeLinux(cmMakefile* mf)
+{
+	std::ostringstream e;
+	e << this->GetName() << " does not support Linux.";
+	mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+	return false;
+}
+
 bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {
