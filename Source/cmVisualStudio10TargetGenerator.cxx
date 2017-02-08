@@ -2304,12 +2304,40 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
     }
 
-    // If not in debug mode, write the DebugInformationFormat field
-    // without value so PDBs don't get generated uselessly.
-    if (!clOptions.IsDebug()) {
-      this->WriteString("<DebugInformationFormat>"
-                        "</DebugInformationFormat>\n",
-                        3);
+    
+    if (this->GlobalGenerator->TargetsLinux() == false)
+    {
+        // If not in debug mode, write the DebugInformationFormat field
+        // without value so PDBs don't get generated uselessly.
+        this->WriteString("<DebugInformationFormat>"
+            "</DebugInformationFormat>\n",
+            3);
+
+    }
+    else
+    {
+        //GNARLY_TODO: Should use the compiler flags to determine this not the config type.
+        //FullDebug Flags: -g2 -gdwarf-2
+        //Minimal Flags: -g1
+        //None Flags: -g0
+        if (configName == "Debug")
+        {
+            this->WriteString("<DebugInformationFormat>FullDebug"
+                "</DebugInformationFormat>\n",
+                3);
+        }
+        else if (configName == "RelWithDebInfo")
+        {
+            this->WriteString("<DebugInformationFormat>Minimal"
+                "</DebugInformationFormat>\n",
+                3);
+        }
+        else
+        {
+            this->WriteString("<DebugInformationFormat>None"
+                "</DebugInformationFormat>\n",
+                3);
+        }
     }
 
     // Specify the compiler program database file if configured.
