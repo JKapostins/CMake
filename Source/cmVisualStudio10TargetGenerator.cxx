@@ -2300,7 +2300,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
                         "$(IntDir)%(filename).obj"
                         "</ObjectFileName>\n",
                         3);
-    } else {
+    } else if (this->GlobalGenerator->TargetsLinux() == false) {
       this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
     }
 
