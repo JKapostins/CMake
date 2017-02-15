@@ -841,6 +841,22 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     this->WritePlatformConfigTag("PropertyGroup", i->c_str(), 1,
                                  " Label=\"Configuration\"", "\n");
 
+    if (this->GlobalGenerator->TargetsLinux())
+    {
+        //Create remote deployment path by replacing the local project root with the remote root.
+        std::string localProjectRoot = this->Makefile->GetCurrentSourceDirectory();
+        static int subStrIndex = localProjectRoot.size() - Name.size();
+        std::string remoteProjectRoot = "~/projects/";
+        remoteProjectRoot += localProjectRoot.substr(subStrIndex);
+
+        //Write out the remote location to the project file.
+        std::string remoteProjectDir = "<RemoteProjectDir>";
+        remoteProjectDir += remoteProjectRoot;
+        remoteProjectDir += "</RemoteProjectDir>\n";
+        this->WriteString(remoteProjectDir.c_str(), 2);
+    }
+
+
     if (csproj != this->ProjectType) {
       std::string configType = "<ConfigurationType>";
       if (const char* vsConfigurationType =
