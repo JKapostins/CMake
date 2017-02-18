@@ -130,6 +130,7 @@ typedef CM_UNORDERED_MAP<std::string, Json::Value> JsonValueMapType;
 
 } // namespace
 
+static std::string globalHomeDirectory;
 static bool cmakeCheckStampFile(const char* stampName, bool verbose = true);
 static bool cmakeCheckStampList(const char* stampList, bool verbose = true);
 
@@ -1011,10 +1012,25 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 
 void cmake::SetHomeDirectory(const std::string& dir)
 {
+    //This static var is used so we can always get the root directory of the project
+    //no matter what cmake project is being generated. See the comment above GetGlobalHomeDirectory()
+    if (globalHomeDirectory.size() == 0)
+    {
+        globalHomeDirectory = dir;
+    }
+
   this->State->SetSourceDirectory(dir);
   if (this->CurrentSnapshot.IsValid()) {
     this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
   }
+}
+
+//Note to cmake reviewer: is this necessary? I couldn't use the home directory
+//that already existed because it would change based on the current project that was
+//being generated. Is there another way to expose this data?
+const char* cmake::GetGlobalHomeDirectory() const
+{
+    return globalHomeDirectory.c_str();
 }
 
 const char* cmake::GetHomeDirectory() const

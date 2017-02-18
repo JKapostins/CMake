@@ -131,6 +131,7 @@ public:
    * home directory is the top directory of the project. It is the
    * path-to-source cmake was run with.
    */
+  const char* GetGlobalHomeDirectory() const;
   void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const;
   void SetHomeOutputDirectory(const std::string& dir);

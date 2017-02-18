@@ -51,6 +51,7 @@ private:
   };
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
+  std::string ConvertLocalPathToRemoteLinuxPath(const std::string& localPath);
   void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();

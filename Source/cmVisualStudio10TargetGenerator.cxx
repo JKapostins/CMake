@@ -843,15 +843,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 
     if (this->GlobalGenerator->TargetsLinux())
     {
-        //Create remote deployment path by replacing the local project root with the remote root.
-        std::string localProjectRoot = this->Makefile->GetCurrentSourceDirectory();
-        static int subStrIndex = localProjectRoot.size() - Name.size();
-        std::string remoteProjectRoot = "~/projects/";
-        remoteProjectRoot += localProjectRoot.substr(subStrIndex);
-
+        std::string localSourceDir = this->Makefile->GetCurrentSourceDirectory();
         //Write out the remote location to the project file.
         std::string remoteProjectDir = "<RemoteProjectDir>";
-        remoteProjectDir += remoteProjectRoot;
+        remoteProjectDir += ConvertLocalPathToRemoteLinuxPath(localSourceDir);
         remoteProjectDir += "</RemoteProjectDir>\n";
         this->WriteString(remoteProjectDir.c_str(), 2);
     }
@@ -1174,6 +1169,17 @@ std::string cmVisualStudio10TargetGenerator::ConvertPath(
     ? cmSystemTools::RelativePath(
         this->LocalGenerator->GetCurrentBinaryDirectory(), path.c_str())
     : path.c_str();
+}
+
+std::string cmVisualStudio10TargetGenerator::ConvertLocalPathToRemoteLinuxPath(const std::string& localPath)
+{
+    std::string localProjectRoot = this->GlobalGenerator->GetCMakeInstance()->GetGlobalHomeDirectory();
+    auto lastSlashIndex = localProjectRoot.find_last_of('/');
+    std::string normalizedPath = localPath.substr(lastSlashIndex + 1);
+
+    std::string remoteProjectPath = "$(RemoteRootDir)/";
+    remoteProjectPath += normalizedPath;
+    return remoteProjectPath;
 }
 
 void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
