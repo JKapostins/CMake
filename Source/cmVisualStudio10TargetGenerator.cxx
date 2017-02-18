@@ -3109,12 +3109,26 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
          this->Configurations.begin();
        i != this->Configurations.end(); ++i) {
     std::vector<std::string> includes;
+    std::vector<std::string> remoteIncludes;
     this->LocalGenerator->GetIncludeDirectories(
       includes, this->GeneratorTarget, "C", i->c_str());
     for (std::vector<std::string>::iterator ii = includes.begin();
          ii != includes.end(); ++ii) {
+        if (this->GlobalGenerator->TargetsLinux())
+        {
+            remoteIncludes.push_back(ConvertLocalPathToRemoteLinuxPath(*ii));
+        }
       this->ConvertToWindowsSlash(*ii);
     }
+
+    if (this->GlobalGenerator->TargetsLinux())
+    {
+        for (int i = 0; i < remoteIncludes.size(); ++i)
+        {
+            includes.push_back(remoteIncludes[i]);
+        }
+    }
+
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
