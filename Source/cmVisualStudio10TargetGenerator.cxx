@@ -843,6 +843,14 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 
     if (this->GlobalGenerator->TargetsLinux())
     {
+        if (this->GlobalGenerator->GetRemoteProjectRootDirectory().size() > 0)
+        {
+            std::string remoteProjectRoot = "<RemoteRootDir>";
+            remoteProjectRoot += this->GlobalGenerator->GetRemoteProjectRootDirectory();
+            remoteProjectRoot += "</RemoteRootDir>\n";
+            this->WriteString(remoteProjectRoot.c_str(), 2);
+        }
+
         std::string localSourceDir = this->Makefile->GetCurrentSourceDirectory();
         //Write out the remote location to the project file.
         std::string remoteProjectDir = "<RemoteProjectDir>";

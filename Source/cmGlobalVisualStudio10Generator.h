@@ -57,6 +57,9 @@ public:
   /** Return the CMAKE_SYSTEM_NAME.  */
   std::string const& GetSystemName() const { return this->SystemName; }
 
+  /** Return the REMOTE_PROJECT_ROOT_DIR.  */
+  std::string const& GetRemoteProjectRootDirectory() const { return RemoteProjectRootDirectory;  }
+
   /** Return the CMAKE_SYSTEM_VERSION.  */
   std::string const& GetSystemVersion() const { return this->SystemVersion; }
 
@@ -122,6 +125,7 @@ protected:
   std::string DefaultPlatformToolset;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;
+  std::string RemoteProjectRootDirectory;
   std::string SystemVersion;
   std::string NsightTegraVersion;
   cmIDEFlagTable const* DefaultClFlagTable;

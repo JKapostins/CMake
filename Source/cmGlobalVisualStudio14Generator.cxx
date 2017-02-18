@@ -141,7 +141,24 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
 
 bool cmGlobalVisualStudio14Generator::InitializeLinux(cmMakefile* mf)
 {
-	return true; //GNARLY_TODO: Check to make sure the linux tools are installed (https://marketplace.visualstudio.com/items?itemName=VisualCPPTeam.VisualCforLinuxDevelopment)
+    RemoteProjectRootDirectory = mf->GetSafeDefinition("REMOTE_PROJECT_ROOT_DIR");
+    if (RemoteProjectRootDirectory.size() == 0)
+    {
+        //GNARLY_TODO: This should be a fatal error once we stop letting msvc try to compile the test project.
+        std::ostringstream e;
+        e << "REMOTE_PROJECT_ROOT_DIR was not defined and is required for Linux builds that are deployed from Visual Studio.";
+        mf->IssueMessage(cmake::WARNING, e.str());
+    }
+
+    if (RemoteProjectRootDirectory[0] == '~')
+    {
+        std::ostringstream e;
+        e << "Partial path detected for REMOTE_PROJECT_ROOT_DIR. Full path is required (ex. /home/user/projects)";
+        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+        return false;
+    }
+
+    return true; //GNARLY_TODO: Check to make sure the linux tools are installed (https://marketplace.visualstudio.com/items?itemName=VisualCPPTeam.VisualCforLinuxDevelopment)
 }
 
 bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
