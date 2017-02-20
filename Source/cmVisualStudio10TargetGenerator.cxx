@@ -3198,7 +3198,9 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   const char* name, std::vector<cmCustomCommand> const& commands,
   std::string const& configName)
 {
-  if (commands.empty()) {
+  //GNARLY_HACK: Remove this hack when removing the hack at the bottom of the function.
+  bool hackCheck = (!GlobalGenerator->TargetsLinux() || this->GeneratorTarget->GetType() != cmStateEnums::UTILITY);
+  if (commands.empty() && hackCheck) {
     return;
   }
   this->WriteString("<", 2);
@@ -3231,6 +3233,29 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     (*this->BuildFileStream) << "</Command>";
   }
   (*this->BuildFileStream) << "\n";
+
+  //Interface libraries don't copy sources so the work around is to create a custom target (Utility) and add the sources to it.
+  //This code will take the headers that are part of the custom project and ensure they are copied to the remote machine.
+  //GNARLY_HACK: Move this to a more appropriate location. It works as a prototype.
+  if (GlobalGenerator->TargetsLinux() && this->GeneratorTarget->GetType() == cmStateEnums::UTILITY && (strcmp("PreBuildEvent", name) == 0))
+  {
+      std::vector<cmSourceFile const*> extraSources;
+      this->GeneratorTarget->GetExtraSources(extraSources, "");
+      if (extraSources.size() > 0)
+      {
+          std::string additionalSources = "<AdditionalSourcesToCopyMapping>";
+          for (std::vector<cmSourceFile const*>::const_iterator si = extraSources.begin(); si != extraSources.end(); ++si)
+          {
+              std::string localPath = (*si)->GetFullPath();
+              additionalSources += localPath + ":=";
+              additionalSources += ConvertLocalPathToRemoteLinuxPath(localPath) + ";";
+          }
+          additionalSources += "</AdditionalSourcesToCopyMapping>\n";
+
+          this->WriteString(additionalSources.c_str(), 2);
+      }
+  }
+
   this->WriteString("</", 2);
   (*this->BuildFileStream) << name << ">\n";
 }
